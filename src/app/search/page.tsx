@@ -1,23 +1,12 @@
+'use client'
+
 import { getArchivePosts, getGazetteArticles, getIndexItems } from '@/lib/content'
 import SearchBar from '@/components/ui/SearchBar'
 import PostCard from '@/components/ui/PostCard'
-import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArchivePost, GazetteArticle, IndexItem } from '@/types/content'
-
-interface SearchPageProps {
-  searchParams: Promise<{ q?: string }>
-}
-
-export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const { q } = await searchParams
-  const query = q || ''
-  
-  return {
-    title: query ? `Search: "${query}" | Diamond Street Collective` : 'Search | Diamond Street Collective',
-    description: query ? `Search results for "${query}" in the Diamond Street Collective collection.` : 'Search the Diamond Street Collective collection.',
-  }
-}
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 // Helper function to extract searchable text from any content type
 function getSearchableText(item: ArchivePost | GazetteArticle | IndexItem): string {
@@ -62,14 +51,35 @@ function getSearchableText(item: ArchivePost | GazetteArticle | IndexItem): stri
   return baseText.join(' ')
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const { q } = await searchParams
-  const query = q || ''
+function SearchPageContent() {
+  const searchParams = useSearchParams()
+  const query = searchParams.get('q') || ''
+  
+  const [archivePosts, setArchivePosts] = useState<ArchivePost[]>([])
+  const [gazetteArticles, setGazetteArticles] = useState<GazetteArticle[]>([])
+  const [indexItems, setIndexItems] = useState<IndexItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Get all content
-  const archivePosts = await getArchivePosts()
-  const gazetteArticles = await getGazetteArticles()
-  const indexItems = await getIndexItems()
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const [posts, articles, items] = await Promise.all([
+          getArchivePosts(),
+          getGazetteArticles(),
+          getIndexItems()
+        ])
+        setArchivePosts(posts)
+        setGazetteArticles(articles)
+        setIndexItems(items)
+      } catch (error) {
+        console.error('Error loading content:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadContent()
+  }, [])
 
   // Search function
   const searchContent = (content: (ArchivePost | GazetteArticle | IndexItem)[], query: string) => {
@@ -88,6 +98,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const indexResults = searchContent(indexItems, query)
 
   const totalResults = archiveResults.length + gazetteResults.length + indexResults.length
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-charcoal-900 mx-auto"></div>
+            <p className="mt-4 text-charcoal-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -207,7 +230,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 Gazette
               </h3>
               <p className="text-body text-sm text-charcoal-600 mb-4">
-                Essays, reviews, and cultural commentary
+                Scholarly articles and research papers
               </p>
               <Link 
                 href="/gazette" 
@@ -218,12 +241,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </div>
 
             <div className="text-center p-6 bg-parchment-100 border border-parchment-300 rounded-lg">
-              <div className="text-4xl mb-4">🏛️</div>
+              <div className="text-4xl mb-4">💎</div>
               <h3 className="text-display text-lg font-semibold text-charcoal-900 mb-2">
                 Index
               </h3>
               <p className="text-body text-sm text-charcoal-600 mb-4">
-                Catalog of artifacts and estate items
+                Catalog of aristocratic artifacts and heirlooms
               </p>
               <Link 
                 href="/index" 
@@ -236,5 +259,22 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         )}
       </div>
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-charcoal-900 mx-auto"></div>
+            <p className="mt-4 text-charcoal-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SearchPageContent />
+    </Suspense>
   )
 } 
