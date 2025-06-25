@@ -42,6 +42,12 @@ Diamond Street Collective presents itself as a sophisticated digital estate cata
 - ✅ **Accessibility improvements**
 - ✅ **Performance optimizations**
 
+### Phase 5: Testing & Quality Assurance 🧪
+- ✅ **Cypress E2E testing suite** for critical user flows
+- ✅ **Component testing** for UI components
+- ✅ **Automated test scripts** for CI/CD integration
+- ✅ **Test coverage** for homepage, search, and archive functionality
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -68,6 +74,37 @@ The site will be available at `http://localhost:3000`
 npm run build
 npm start
 ```
+
+## 🧪 Testing
+
+This project includes a comprehensive Cypress testing suite for both end-to-end (E2E) and component testing.
+
+### Running Tests
+
+```bash
+# Open Cypress Test Runner (interactive mode)
+npm run cypress:open
+
+# Run E2E tests (headless mode)
+npm run cypress:run
+
+# Start dev server and run E2E tests
+npm run test:e2e
+
+# Run component tests
+npm run test:component
+```
+
+### Test Structure
+
+- `cypress/e2e/` - End-to-end tests for critical user flows
+  - `homepage.cy.ts` - Homepage functionality
+  - `search.cy.ts` - Search functionality  
+  - `archive.cy.ts` - Archive page functionality
+- `cypress/component/` - Component tests for UI components
+- `cypress/support/` - Support files and custom commands
+
+For detailed testing documentation, see [cypress/README.md](cypress/README.md).
 
 ## 📁 Project Structure
 
@@ -104,6 +141,12 @@ src/
 ├── types/
 │   └── content.ts         # TypeScript type definitions
 └── styles/                # Additional styles
+cypress/                   # Cypress testing suite
+├── e2e/                   # End-to-end tests
+├── component/             # Component tests
+├── support/               # Support files and commands
+├── fixtures/              # Test data
+└── README.md              # Testing documentation
 ```
 
 ## 🎨 Design System
