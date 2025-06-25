@@ -81,13 +81,9 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
-          headless: true
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
           config: baseUrl=http://localhost:3000
-          record: false
-          parallel: false
-          group: 'Actions example'
           spec: cypress/e2e/**/*.cy.ts
       
       - name: Upload screenshots
